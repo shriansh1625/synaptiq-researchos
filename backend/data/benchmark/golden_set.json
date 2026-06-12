@@ -1,0 +1,167 @@
+{
+  "version": "1.0.0",
+  "description": "Golden evaluation set for SynaptiQ ResearchOS benchmark metrics",
+  "cases": [
+    {
+      "case_id": "rag_hallucination_01",
+      "query": "How does RAG reduce hallucination in biomedical QA?",
+      "verified_claims": [
+        {
+          "claim_id": "clm_1",
+          "paper_id": "arxiv:2305.14233",
+          "text": "Retrieval augmentation grounds generation in source documents.",
+          "verdict": "SUPPORTED",
+          "confidence": 0.91
+        },
+        {
+          "claim_id": "clm_2",
+          "paper_id": "arxiv:2310.11511",
+          "text": "Citation-backed answers improve factual consistency in QA.",
+          "verdict": "SUPPORTED",
+          "confidence": 0.89
+        },
+        {
+          "claim_id": "clm_3",
+          "paper_id": "arxiv:2401.01511",
+          "text": "Unverified claims should be rejected when evidence is absent.",
+          "verdict": "SUPPORTED",
+          "confidence": 0.93
+        }
+      ],
+      "research_gaps": [
+        {
+          "gap_id": "gap_1",
+          "topic": "Biomedical RAG hallucination benchmarks",
+          "description": "Limited domain-specific evaluation for hallucination in biomedical QA.",
+          "impact_score": 0.82
+        }
+      ],
+      "brief": {
+        "agent": "brief",
+        "status": "ok",
+        "overall_confidence": 0.9,
+        "report": {
+          "report_id": "golden_1",
+          "title": "RAG Hallucination Mitigation",
+          "executive_summary": "Grounded retrieval reduces unsupported generations.",
+          "key_findings": [
+            {
+              "text": "RAG grounds answers in retrieved evidence spans.",
+              "citations": ["clm_1"]
+            },
+            {
+              "text": "Citation-backed synthesis improves QA consistency.",
+              "citations": ["clm_2"]
+            }
+          ],
+          "comparative_insights": [],
+          "consensus": [],
+          "contradictions": [],
+          "research_gaps": [
+            {
+              "text": "Biomedical domain benchmarks remain sparse.",
+              "gap_id": "gap_1"
+            }
+          ],
+          "future_opportunities": [
+            {
+              "text": "Build biomedical hallucination evaluation suites.",
+              "citations": ["gap_1"]
+            }
+          ],
+          "recommendations": [
+            {
+              "text": "Enforce claim-level citation gates in production briefs.",
+              "citations": ["clm_3"]
+            }
+          ],
+          "limitations": ""
+        },
+        "citations": [],
+        "citation_integrity": {
+          "checked": true,
+          "all_citations_valid": true,
+          "uncited_removed": 0
+        }
+      },
+      "expected_topics": ["rag", "hallucination", "retrieval", "biomedical"]
+    },
+    {
+      "case_id": "multi_agent_02",
+      "query": "Multi-agent orchestration for research synthesis",
+      "verified_claims": [
+        {
+          "claim_id": "clm_a",
+          "paper_id": "arxiv:2402.01030",
+          "text": "Specialized agents outperform monolithic prompts on verification tasks.",
+          "verdict": "SUPPORTED",
+          "confidence": 0.94
+        },
+        {
+          "claim_id": "clm_b",
+          "paper_id": "arxiv:2403.00821",
+          "text": "Stateful graphs enable auditable multi-step reasoning.",
+          "verdict": "SUPPORTED",
+          "confidence": 0.92
+        }
+      ],
+      "research_gaps": [
+        {
+          "gap_id": "gap_a",
+          "topic": "Enterprise observability for agent graphs",
+          "description": "Few studies quantify OTel coverage across agent pipelines.",
+          "impact_score": 0.77
+        }
+      ],
+      "brief": {
+        "agent": "brief",
+        "status": "ok",
+        "overall_confidence": 0.92,
+        "report": {
+          "report_id": "golden_2",
+          "title": "Multi-Agent Research Synthesis",
+          "executive_summary": "Decomposed agents improve verification and auditability.",
+          "key_findings": [
+            {
+              "text": "Verification-specialized agents improve grounding quality.",
+              "citations": ["clm_a"]
+            },
+            {
+              "text": "Graph orchestration preserves provenance across steps.",
+              "citations": ["clm_b"]
+            }
+          ],
+          "comparative_insights": [],
+          "consensus": [],
+          "contradictions": [],
+          "research_gaps": [
+            {
+              "text": "Observability benchmarks for LangGraph pipelines are immature.",
+              "gap_id": "gap_a"
+            }
+          ],
+          "future_opportunities": [
+            {
+              "text": "Standardize OpenTelemetry spans per agent node.",
+              "citations": ["gap_a"]
+            }
+          ],
+          "recommendations": [
+            {
+              "text": "Deploy checkpointed graphs for reproducible research sessions.",
+              "citations": ["clm_b"]
+            }
+          ],
+          "limitations": ""
+        },
+        "citations": [],
+        "citation_integrity": {
+          "checked": true,
+          "all_citations_valid": true,
+          "uncited_removed": 0
+        }
+      },
+      "expected_topics": ["agent", "orchestration", "langgraph", "verification"]
+    }
+  ]
+}

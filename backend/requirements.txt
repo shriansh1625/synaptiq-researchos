@@ -1,0 +1,54 @@
+# SynaptiQ ResearchOS — production runtime dependencies
+# Install: pip install -r requirements.txt
+# Dev/test: pip install -r requirements-dev.txt
+
+# --- API ---
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+httpx>=0.27,<1.0
+
+# --- Configuration & validation ---
+pydantic>=2.6,<3.0
+pydantic-settings>=2.2,<3.0
+
+# --- Agents & LLM ---
+langgraph>=0.2,<1.0
+langchain>=0.3,<1.0
+langchain-core>=0.3,<1.0
+langchain-google-genai>=2.0,<3.0
+google-generativeai>=0.8,<1.0
+
+# --- Embeddings & vector search ---
+sentence-transformers>=3.0,<4.0
+faiss-cpu>=1.8,<2.0
+
+# --- Database & migrations ---
+sqlalchemy[asyncio]>=2.0,<3.0
+alembic>=1.13,<2.0
+asyncpg>=0.29,<1.0
+greenlet>=3.0,<4.0
+
+# --- Cache ---
+redis>=5.0,<6.0
+
+# --- Knowledge graph ---
+networkx>=3.2,<4.0
+pyvis>=0.3,<1.0
+
+# --- Report generation ---
+reportlab>=4.2,<5.0
+
+# --- Observability (OpenTelemetry) ---
+opentelemetry-api>=1.27,<2.0
+opentelemetry-sdk>=1.27,<2.0
+opentelemetry-instrumentation-fastapi>=0.48b0
+opentelemetry-instrumentation-sqlalchemy>=0.48b0
+opentelemetry-instrumentation-redis>=0.48b0
+opentelemetry-instrumentation-httpx>=0.48b0
+opentelemetry-exporter-otlp-proto-grpc>=1.27,<2.0
+
+# --- Azure (production artifacts) ---
+azure-storage-blob>=12.19,<13.0
+
+# --- Docker / container runtime ---
+gunicorn>=22.0,<24.0

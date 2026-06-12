@@ -1,0 +1,1 @@
+﻿"""SynaptiQ ResearchOS package."""

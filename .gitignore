@@ -1,0 +1,46 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+docker/.env
+backend/.env
+frontend/.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+
+# Node / Next.js
+node_modules/
+frontend/.next/
+frontend/out/
+*.tsbuildinfo
+
+# Data and generated artifacts
+backend/data/reports/
+_deck_pages/
+*.log
+
+# OS and IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local exports (regenerate with scripts/)
+_deck_pages/
+*.pyc
+
+# Keep submission PDFs trackable if desired; uncomment to ignore:
+# SynaptiQ_Source_Code_Submission.pdf
+# SynaptiQ_PPT_Content_Pack.pdf

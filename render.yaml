@@ -1,0 +1,50 @@
+# SynaptiQ ResearchOS — Render Blueprint
+# Deploy: Render Dashboard → New → Blueprint → connect this repo
+# Set GEMINI_API_KEY (and optional SEMANTIC_SCHOLAR_API_KEY) in the API service after deploy.
+
+databases:
+  - name: synaptiq-db
+    plan: free
+    databaseName: synaptiq
+    user: synaptiq
+
+services:
+  - type: keyvalue
+    name: synaptiq-redis
+    plan: free
+    ipAllowList: []
+
+  - type: web
+    name: synaptiq-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: docker/Dockerfile
+    dockerContext: backend
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash-lite
+      - key: BENCHMARK_FAST_ENABLED
+        value: "true"
+      - key: DISCOVERY_MAX_PAPERS
+        value: "8"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SEMANTIC_SCHOLAR_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: synaptiq-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: synaptiq-redis
+          property: connectionString

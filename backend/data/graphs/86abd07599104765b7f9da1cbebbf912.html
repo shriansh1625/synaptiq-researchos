@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 720px;
+                 background-color: #0f172a;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"font": {"color": "#e2e8f0"}, "group": "paper", "id": "ss:paper-1", "label": "Intermittent Fasting and Insulin Sensitivity", "shape": "dot", "size": 28, "title": "paper: Intermittent Fasting and Insulin Sensitivity"}, {"font": {"color": "#e2e8f0"}, "group": "author", "id": "author:A. Rao", "label": "A. Rao", "shape": "dot", "size": 21, "title": "author: A. Rao"}, {"font": {"color": "#e2e8f0"}, "group": "paper", "id": "arxiv:2104.00111", "label": "Time-Restricted Eating and Glycemic Control", "shape": "dot", "size": 28, "title": "paper: Time-Restricted Eating and Glycemic Control"}, {"font": {"color": "#e2e8f0"}, "group": "author", "id": "author:K. Lin", "label": "K. Lin", "shape": "dot", "size": 21, "title": "author: K. Lin"}, {"font": {"color": "#e2e8f0"}, "group": "topic", "id": "topic:insulin_sensitivity", "label": "insulin_sensitivity", "shape": "dot", "size": 22, "title": "topic: insulin_sensitivity"}, {"font": {"color": "#e2e8f0"}, "group": "claim", "id": "clm_ss_paper-1_0", "label": "Intermittent Fasting and Insulin Sensitivity\n\nRC", "shape": "dot", "size": 27, "title": "claim: Intermittent Fasting and Insulin Sensitivity\n\nRCT showing improved insulin sensi"}, {"font": {"color": "#e2e8f0"}, "group": "claim", "id": "clm_arxiv_2104.00111_0", "label": "Time-Restricted Eating and Glycemic Control\n\nStu", "shape": "dot", "size": 27, "title": "claim: Time-Restricted Eating and Glycemic Control\n\nStudy of glucose metabolism with ti"}, {"font": {"color": "#e2e8f0"}, "group": "method", "id": "method:systematic_review", "label": "Literature Review", "shape": "dot", "size": 21, "title": "method: Literature Review"}, {"font": {"color": "#e2e8f0"}, "group": "dataset", "id": "dataset:corpus", "label": "Retrieved Corpus", "shape": "dot", "size": 21, "title": "dataset: Retrieved Corpus"}]);
+                  edges = new vis.DataSet([{"color": "#7F7F7F", "dashes": false, "from": "author:A. Rao", "title": "authored", "to": "ss:paper-1", "width": 5}, {"color": "#7F7F7F", "dashes": false, "from": "author:K. Lin", "title": "authored", "to": "arxiv:2104.00111", "width": 5}, {"color": "#2CA02C", "dashes": false, "from": "clm_ss_paper-1_0", "title": "supports", "to": "ss:paper-1", "width": 4}, {"color": "#7F7F7F", "dashes": false, "from": "clm_ss_paper-1_0", "title": "topic", "to": "topic:insulin_sensitivity", "width": 5}, {"color": "#2CA02C", "dashes": false, "from": "clm_arxiv_2104.00111_0", "title": "supports", "to": "arxiv:2104.00111", "width": 4}, {"color": "#7F7F7F", "dashes": false, "from": "clm_arxiv_2104.00111_0", "title": "topic", "to": "topic:insulin_sensitivity", "width": 5}, {"color": "#8C564B", "dashes": false, "from": "method:systematic_review", "title": "analyzed", "to": "ss:paper-1", "width": 5}, {"color": "#8C564B", "dashes": false, "from": "method:systematic_review", "title": "analyzed", "to": "arxiv:2104.00111", "width": 5}, {"color": "#2CA02C", "dashes": false, "from": "clm_ss_paper-1_0", "title": "AGREES", "to": "clm_arxiv_2104.00111_0", "width": 4}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 120}}, "interaction": {"hover": true, "navigationButtons": true}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

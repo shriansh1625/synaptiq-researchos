@@ -1,0 +1,144 @@
+# SynaptiQ ResearchOS — local development stack
+# Usage (from repo root):
+#   docker compose -f docker/docker-compose.yml --env-file docker/.env up --build
+
+name: synaptiq
+
+services:
+  api:
+    build:
+      context: ../backend
+      dockerfile: ../docker/Dockerfile
+    container_name: synaptiq-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-synaptiq}:${POSTGRES_PASSWORD:-synaptiq}@postgres:5432/${POSTGRES_DB:-synaptiq}
+      REDIS_URL: redis://redis:6379/0
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-deepseek/deepseek-chat}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash-lite}
+      GEMINI_TEMPERATURE: ${GEMINI_TEMPERATURE:-0.2}
+      GEMINI_MAX_CONCURRENT: ${GEMINI_MAX_CONCURRENT:-2}
+      GEMINI_MIN_INTERVAL_SEC: ${GEMINI_MIN_INTERVAL_SEC:-0.4}
+      SEMANTIC_SCHOLAR_API_KEY: ${SEMANTIC_SCHOLAR_API_KEY:-}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      BENCHMARK_FAST_ENABLED: ${BENCHMARK_FAST_ENABLED:-true}
+      DISCOVERY_MAX_PAPERS: ${DISCOVERY_MAX_PAPERS:-8}
+      DISCOVERY_MIN_PAPERS: ${DISCOVERY_MIN_PAPERS:-4}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - api_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    networks:
+      - synaptiq-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: synaptiq-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-synaptiq}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-synaptiq}
+      POSTGRES_DB: ${POSTGRES_DB:-synaptiq}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - synaptiq-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-synaptiq} -d ${POSTGRES_DB:-synaptiq}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../docker/frontend.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_DEMO_SESSION_ID: ${NEXT_PUBLIC_DEMO_SESSION_ID:-}
+        NEXT_PUBLIC_DEMO_REPORT_ID: ${NEXT_PUBLIC_DEMO_REPORT_ID:-}
+        NEXT_PUBLIC_DEMO_QUERY: ${NEXT_PUBLIC_DEMO_QUERY:-}
+        NEXT_PUBLIC_DEMO_LABEL: ${NEXT_PUBLIC_DEMO_LABEL:-Hero demo}
+    container_name: synaptiq-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - synaptiq-net
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.109.0
+    container_name: synaptiq-otel
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otel-collector.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - synaptiq-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: synaptiq-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - synaptiq-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+networks:
+  synaptiq-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: synaptiq-postgres-data
+  redis_data:
+    name: synaptiq-redis-data
+  api_data:
+    name: synaptiq-api-data

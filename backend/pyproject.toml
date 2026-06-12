@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synaptiq-researchos"
+version = "0.1.0"
+description = "SynaptiQ ResearchOS — autonomous multi-agent research intelligence platform"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { text = "Proprietary" }
+authors = [{ name = "SynaptiQ Team" }]
+keywords = ["research", "agents", "langgraph", "rag", "fastapi"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: FastAPI",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    # API
+    "fastapi>=0.115,<1.0",
+    "uvicorn[standard]>=0.30,<1.0",
+    "httpx>=0.27,<1.0",
+    # Configuration & validation
+    "pydantic>=2.6,<3.0",
+    "pydantic-settings>=2.2,<3.0",
+    # Agents & LLM
+    "langgraph>=0.2,<1.0",
+    "langchain>=0.3,<1.0",
+    "langchain-core>=0.3,<1.0",
+    "langchain-google-genai>=2.0,<3.0",
+    "google-generativeai>=0.8,<1.0",
+    # Embeddings & vector search
+    "sentence-transformers>=3.0,<4.0",
+    "faiss-cpu>=1.8,<2.0",
+    # Database & migrations
+    "sqlalchemy[asyncio]>=2.0,<3.0",
+    "alembic>=1.13,<2.0",
+    "asyncpg>=0.29,<1.0",
+    "greenlet>=3.0,<4.0",
+    # Cache
+    "redis>=5.0,<6.0",
+    # Knowledge graph
+    "networkx>=3.2,<4.0",
+    "pyvis>=0.3,<1.0",
+    # Observability
+    "opentelemetry-api>=1.27,<2.0",
+    "opentelemetry-sdk>=1.27,<2.0",
+    "opentelemetry-instrumentation-fastapi>=0.48b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.48b0",
+    "opentelemetry-instrumentation-redis>=0.48b0",
+    "opentelemetry-instrumentation-httpx>=0.48b0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.27,<2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "httpx>=0.27,<1.0",
+]
+docker = [
+  # ASGI server & production process management for container images
+    "uvicorn[standard]>=0.30,<1.0",
+    "gunicorn>=22.0,<24.0",
+]
+# GPU vector search (Linux + CUDA only; use faiss-cpu in requirements.txt by default)
+gpu = [
+    "faiss-gpu>=1.8,<2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/synaptiq/researchos"
+Documentation = "https://github.com/synaptiq/researchos#readme"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["config*", "app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
