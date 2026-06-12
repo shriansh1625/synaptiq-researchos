@@ -46,6 +46,8 @@ Never commit `docker/.env` or `backend/.env` (they are gitignored).
 
 **Free tier note:** Render spins down after inactivity; first request may take 30–60s.
 
+**Region note:** `synaptiq-api` and `synaptiq-db` must be in the **same region** (both `oregon` in `render.yaml`). If the API is in Singapore but the database is in Oregon, the internal `DATABASE_URL` hostname will not resolve (`Name or service not known`). Either align regions or set `DATABASE_URL` on the API to the database **External** connection string from the Render dashboard.
+
 ---
 
 ## 3. Deploy frontend on Vercel

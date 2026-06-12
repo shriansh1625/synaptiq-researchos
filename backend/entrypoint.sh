@@ -2,7 +2,17 @@
 set -e
 
 echo "Running database migrations..."
-alembic upgrade head
+attempt=0
+max_attempts=30
+until alembic upgrade head; do
+  attempt=$((attempt + 1))
+  if [ "$attempt" -ge "$max_attempts" ]; then
+    echo "Database migrations failed after ${max_attempts} attempts."
+    exit 1
+  fi
+  echo "Migration attempt ${attempt} failed; retrying in 5s..."
+  sleep 5
+done
 
 if [ -d ./app/resources/benchmark ]; then
   mkdir -p ./data/benchmark

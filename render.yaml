@@ -5,6 +5,7 @@
 databases:
   - name: synaptiq-db
     plan: free
+    region: oregon
     databaseName: synaptiq
     user: synaptiq
 
@@ -18,12 +19,14 @@ services:
     name: synaptiq-api
     runtime: python
     plan: free
-    region: singapore
+    region: oregon
     rootDir: backend
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt && chmod +x entrypoint.sh
     startCommand: ./entrypoint.sh
     healthCheckPath: /health
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
       - key: ENVIRONMENT
         value: staging
       - key: LOG_LEVEL

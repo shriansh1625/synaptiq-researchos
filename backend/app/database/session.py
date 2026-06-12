@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import AsyncGenerator
 from typing import Any
 
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -20,22 +21,34 @@ SessionLocal: async_sessionmaker[AsyncSession] | None = None
 
 def to_async_database_url(database_url: str) -> str:
     """Normalize a PostgreSQL URL for async SQLAlchemy with asyncpg."""
-    if database_url.startswith("postgresql+asyncpg://"):
-        return database_url
-    if database_url.startswith("postgresql://"):
-        return database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    if database_url.startswith("postgresql+psycopg2://"):
-        return database_url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
-    if database_url.startswith("postgresql+psycopg://"):
-        return database_url.replace("postgresql+psycopg://", "postgresql+asyncpg://", 1)
+    url = make_url(database_url)
+    if url.drivername in {
+        "postgresql",
+        "postgresql+psycopg",
+        "postgresql+psycopg2",
+        "postgresql+asyncpg",
+    }:
+        return url.set(drivername="postgresql+asyncpg").render_as_string(hide_password=False)
     return database_url
+
+
+def asyncpg_connect_args(database_url: str) -> dict[str, Any]:
+    """Return asyncpg connect args for managed Postgres hosts."""
+    host = make_url(database_url).host or ""
+    if host.endswith(".render.com"):
+        return {"ssl": True}
+    return {}
 
 
 def create_engine_from_settings(settings: Settings | None = None, **engine_kwargs: Any) -> AsyncEngine:
     """Create an async SQLAlchemy engine from application settings."""
     resolved_settings = settings or get_settings()
+    async_url = to_async_database_url(resolved_settings.database_url)
+    connect_args = asyncpg_connect_args(async_url)
+    if connect_args:
+        engine_kwargs = {**engine_kwargs, "connect_args": connect_args}
     return create_async_engine(
-        to_async_database_url(resolved_settings.database_url),
+        async_url,
         pool_pre_ping=True,
         **engine_kwargs,
     )
