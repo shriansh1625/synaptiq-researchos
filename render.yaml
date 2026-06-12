@@ -21,7 +21,6 @@ services:
     region: singapore
     rootDir: backend
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt && chmod +x entrypoint.sh
-    preDeployCommand: alembic upgrade head
     startCommand: ./entrypoint.sh
     healthCheckPath: /health
     envVars:
