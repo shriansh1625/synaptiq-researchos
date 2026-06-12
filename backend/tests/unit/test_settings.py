@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from config.settings import Environment, LogLevel, Settings, get_settings
+from config.settings import Environment, LogLevel, Settings, get_settings, validate_llm_config
 
 VALID_ENV = {
     "DATABASE_URL": "postgresql+asyncpg://user:pass@localhost:5432/synaptiq",
@@ -152,8 +152,8 @@ def test_settings_rejects_empty_gemini_api_key(
     monkeypatch.setenv("LLM_PROVIDER", "gemini")
     monkeypatch.setenv("GEMINI_API_KEY", "   ")
 
-    with pytest.raises(ValidationError) as exc_info:
-        Settings()
+    with pytest.raises(ValueError, match="GEMINI_API_KEY is required") as exc_info:
+        validate_llm_config(Settings())
 
     assert "GEMINI_API_KEY is required" in str(exc_info.value)
 

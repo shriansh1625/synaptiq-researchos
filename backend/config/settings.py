@@ -5,9 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
-from typing import Self
-
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from config.render_urls import normalize_database_url
@@ -179,19 +177,18 @@ class Settings(BaseSettings):
         normalized = value.strip()
         return normalized or None
 
-    @model_validator(mode="after")
-    def validate_environment_requirements(self) -> Self:
-        """Apply environment-specific validation rules."""
-        if self.llm_provider == LLMProvider.GEMINI and not self.gemini_api_key:
-            raise ValueError("GEMINI_API_KEY is required when LLM_PROVIDER=gemini")
-        if self.llm_provider == LLMProvider.OPENROUTER and not self.openrouter_api_key:
-            raise ValueError("OPENROUTER_API_KEY is required when LLM_PROVIDER=openrouter")
-        if self.llm_provider == LLMProvider.DEEPSEEK and not self.deepseek_api_key:
-            raise ValueError("DEEPSEEK_API_KEY is required when LLM_PROVIDER=deepseek")
-        return self
-
-
 @lru_cache
 def get_settings() -> Settings:
     """Return cached application settings."""
     return Settings()
+
+
+def validate_llm_config(settings: Settings | None = None) -> None:
+    """Ensure the configured LLM provider has a usable API key."""
+    resolved = settings or get_settings()
+    if resolved.llm_provider == LLMProvider.GEMINI and not resolved.gemini_api_key:
+        raise ValueError("GEMINI_API_KEY is required when LLM_PROVIDER=gemini")
+    if resolved.llm_provider == LLMProvider.OPENROUTER and not resolved.openrouter_api_key:
+        raise ValueError("OPENROUTER_API_KEY is required when LLM_PROVIDER=openrouter")
+    if resolved.llm_provider == LLMProvider.DEEPSEEK and not resolved.deepseek_api_key:
+        raise ValueError("DEEPSEEK_API_KEY is required when LLM_PROVIDER=deepseek")
