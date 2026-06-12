@@ -2,6 +2,8 @@
 set -e
 
 echo "Running database migrations..."
+python -c "from config.settings import get_settings; from sqlalchemy.engine import make_url; print('Database host:', make_url(get_settings().database_url).host or 'MISSING')"
+
 attempt=0
 max_attempts=30
 until alembic upgrade head; do

@@ -18,7 +18,11 @@ from app.database.models import (  # noqa: F401 — register models with metadat
     research_session,
     user,
 )
-from app.database.session import asyncpg_connect_args, to_async_database_url
+from app.database.session import (
+    asyncpg_connect_args,
+    to_async_database_url,
+    to_async_database_url_object,
+)
 from config.settings import get_settings
 
 config = context.config
@@ -66,7 +70,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode using an async engine."""
-    async_url = get_database_url()
+    async_url = to_async_database_url_object(get_settings().database_url)
 
     connectable = create_async_engine(
         async_url,

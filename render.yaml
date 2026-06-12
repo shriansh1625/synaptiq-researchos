@@ -13,6 +13,7 @@ services:
   - type: keyvalue
     name: synaptiq-redis
     plan: free
+    region: oregon
     ipAllowList: []
 
   - type: web
@@ -27,6 +28,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
+      - key: RENDER_DB_REGION
+        value: oregon
       - key: ENVIRONMENT
         value: staging
       - key: LOG_LEVEL

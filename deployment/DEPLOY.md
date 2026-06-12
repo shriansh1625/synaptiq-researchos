@@ -46,7 +46,9 @@ Never commit `docker/.env` or `backend/.env` (they are gitignored).
 
 **Free tier note:** Render spins down after inactivity; first request may take 30–60s.
 
-**Region note:** `synaptiq-api` and `synaptiq-db` must be in the **same region** (both `oregon` in `render.yaml`). If the API is in Singapore but the database is in Oregon, the internal `DATABASE_URL` hostname will not resolve (`Name or service not known`). Either align regions or set `DATABASE_URL` on the API to the database **External** connection string from the Render dashboard.
+**Region note:** `synaptiq-api` and `synaptiq-db` must be in the **same region** (both `oregon` in `render.yaml`). Render does **not** move an existing web service when you change region in the blueprint — check **synaptiq-api → Settings → Region**. If it still shows **Singapore**, delete `synaptiq-api` and sync the blueprint to recreate it in Oregon, or set `DATABASE_URL` to the database **External** connection string manually.
+
+The app auto-expands Render internal Postgres hostnames (`dpg-xxxxx-a`) to external FQDNs (`dpg-xxxxx-a.oregon-postgres.render.com`) so cross-region deploys can still connect.
 
 ---
 

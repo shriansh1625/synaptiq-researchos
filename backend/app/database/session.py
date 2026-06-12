@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from sqlalchemy.engine import make_url
+from sqlalchemy.engine import URL, make_url
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -21,6 +21,11 @@ SessionLocal: async_sessionmaker[AsyncSession] | None = None
 
 def to_async_database_url(database_url: str) -> str:
     """Normalize a PostgreSQL URL for async SQLAlchemy with asyncpg."""
+    return to_async_database_url_object(database_url).render_as_string(hide_password=False)
+
+
+def to_async_database_url_object(database_url: str) -> URL:
+    """Return a SQLAlchemy URL object for asyncpg."""
     url = make_url(database_url)
     if url.drivername in {
         "postgresql",
@@ -28,13 +33,14 @@ def to_async_database_url(database_url: str) -> str:
         "postgresql+psycopg2",
         "postgresql+asyncpg",
     }:
-        return url.set(drivername="postgresql+asyncpg").render_as_string(hide_password=False)
-    return database_url
+        return url.set(drivername="postgresql+asyncpg")
+    return url
 
 
-def asyncpg_connect_args(database_url: str) -> dict[str, Any]:
+def asyncpg_connect_args(database_url: str | URL) -> dict[str, Any]:
     """Return asyncpg connect args for managed Postgres hosts."""
-    host = make_url(database_url).host or ""
+    url = database_url if isinstance(database_url, URL) else make_url(database_url)
+    host = url.host or ""
     if host.endswith(".render.com"):
         return {"ssl": True}
     return {}
@@ -43,7 +49,7 @@ def asyncpg_connect_args(database_url: str) -> dict[str, Any]:
 def create_engine_from_settings(settings: Settings | None = None, **engine_kwargs: Any) -> AsyncEngine:
     """Create an async SQLAlchemy engine from application settings."""
     resolved_settings = settings or get_settings()
-    async_url = to_async_database_url(resolved_settings.database_url)
+    async_url = to_async_database_url_object(resolved_settings.database_url)
     connect_args = asyncpg_connect_args(async_url)
     if connect_args:
         engine_kwargs = {**engine_kwargs, "connect_args": connect_args}

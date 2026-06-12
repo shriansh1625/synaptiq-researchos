@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.database import session as session_module
@@ -80,7 +81,7 @@ def test_create_engine_from_settings_uses_database_url(monkeypatch: pytest.Monke
 
     create_engine_from_settings(settings=settings)
 
-    assert captured["url"] == VALID_SETTINGS["database_url"]
+    assert make_url(captured["url"]) == make_url(VALID_SETTINGS["database_url"])
     assert captured["kwargs"]["pool_pre_ping"] is True
 
 

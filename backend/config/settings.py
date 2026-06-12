@@ -10,6 +10,8 @@ from typing import Self
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from config.render_urls import normalize_database_url
+
 _BACKEND_DIR = Path(__file__).resolve().parent.parent
 _ENV_FILE = _BACKEND_DIR / ".env"
 
@@ -131,7 +133,7 @@ class Settings(BaseSettings):
                 "postgresql+psycopg2://"
             )
             raise ValueError(msg)
-        return normalized
+        return normalize_database_url(normalized)
 
     @field_validator("redis_url")
     @classmethod
@@ -186,11 +188,6 @@ class Settings(BaseSettings):
             raise ValueError("OPENROUTER_API_KEY is required when LLM_PROVIDER=openrouter")
         if self.llm_provider == LLMProvider.DEEPSEEK and not self.deepseek_api_key:
             raise ValueError("DEEPSEEK_API_KEY is required when LLM_PROVIDER=deepseek")
-        if self.environment == Environment.PRODUCTION:
-            if not self.azure_storage_connection_string:
-                raise ValueError(
-                    "AZURE_STORAGE_CONNECTION_STRING is required when ENVIRONMENT=production"
-                )
         return self
 
 
