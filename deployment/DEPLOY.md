@@ -35,7 +35,7 @@ Never commit `docker/.env` or `backend/.env` (they are gitignored).
 1. Go to [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint**
 2. Connect your GitHub repo
 3. Render reads `render.yaml` and creates:
-   - `synaptiq-api` (Docker web service)
+   - `synaptiq-api` (Python web service — free tier does not support Docker web services)
    - `synaptiq-db` (PostgreSQL)
    - `synaptiq-redis` (Key Value)
 4. When prompted, set **secret** env vars on `synaptiq-api`:

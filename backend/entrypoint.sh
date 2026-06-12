@@ -4,11 +4,11 @@ set -e
 echo "Running database migrations..."
 alembic upgrade head
 
-if [ -d /app/app/resources/benchmark ]; then
-  mkdir -p /app/data/benchmark
+if [ -d ./app/resources/benchmark ]; then
+  mkdir -p ./data/benchmark
   for f in hero_bundle.json golden_set.json; do
-    if [ ! -f "/app/data/benchmark/$f" ] && [ -f "/app/app/resources/benchmark/$f" ]; then
-      cp "/app/app/resources/benchmark/$f" "/app/data/benchmark/$f"
+    if [ ! -f "./data/benchmark/$f" ] && [ -f "./app/resources/benchmark/$f" ]; then
+      cp "./app/resources/benchmark/$f" "./data/benchmark/$f"
     fi
   done
 fi
