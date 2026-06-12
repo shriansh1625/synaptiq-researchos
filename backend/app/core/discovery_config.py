@@ -13,6 +13,7 @@ class DiscoveryConfig:
     """Runtime configuration for discovery, embeddings, and retrieval."""
 
     embedding_model: str
+    embedding_provider: str
     faiss_index_dir: Path
     chunk_size: int
     chunk_overlap: int
@@ -36,6 +37,7 @@ def get_discovery_config() -> DiscoveryConfig:
             "EMBEDDING_MODEL",
             "sentence-transformers/all-MiniLM-L6-v2",
         ),
+        embedding_provider=os.getenv("EMBEDDING_PROVIDER", "local"),
         faiss_index_dir=Path(os.getenv("FAISS_INDEX_DIR", str(default_faiss))),
         chunk_size=int(os.getenv("CHUNK_SIZE", "512")),
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "64")),

@@ -1,51 +1,50 @@
-"""Sentence-transformer embedding service."""
+"""Embedding service facade (local Sentence-Transformers or Gemini API)."""
 
 from __future__ import annotations
 
-import asyncio
-from functools import lru_cache
+import os
+from typing import Protocol
 
 import numpy as np
 
 from app.core.discovery_config import get_discovery_config
+from app.services.embeddings.gemini_embedder import GeminiEmbedder
+from app.services.embeddings.local_embedder import LocalEmbedder
 
 
-@lru_cache
-def _load_model(model_name: str):
-    from sentence_transformers import SentenceTransformer
+class EmbeddingBackend(Protocol):
+    """Protocol implemented by embedding backends."""
 
-    return SentenceTransformer(model_name)
+    @property
+    def dimension(self) -> int: ...
+
+    async def embed_texts(self, texts: list[str]) -> np.ndarray: ...
+
+    async def embed_text(self, text: str) -> np.ndarray: ...
+
+
+def create_embedder(model_name: str | None = None) -> EmbeddingBackend:
+    """Return the configured embedding backend."""
+    provider = os.getenv("EMBEDDING_PROVIDER", get_discovery_config().embedding_provider).strip().lower()
+    if provider == "gemini":
+        return GeminiEmbedder()
+    return LocalEmbedder(model_name=model_name)
 
 
 class Embedder:
-    """Generate dense embeddings using Sentence Transformers."""
+    """Generate dense embeddings using the configured backend."""
 
-    def __init__(self, model_name: str | None = None) -> None:
-        config = get_discovery_config()
-        self._model_name = model_name or config.embedding_model
+    def __init__(self, model_name: str | None = None, backend: EmbeddingBackend | None = None) -> None:
+        self._backend = backend or create_embedder(model_name)
 
     @property
     def dimension(self) -> int:
-        model = _load_model(self._model_name)
-        return int(model.get_sentence_embedding_dimension())
+        return self._backend.dimension
 
     async def embed_texts(self, texts: list[str]) -> np.ndarray:
         """Embed a batch of texts without blocking the event loop."""
-        if not texts:
-            return np.empty((0, self.dimension), dtype=np.float32)
-
-        def _encode() -> np.ndarray:
-            model = _load_model(self._model_name)
-            vectors = model.encode(
-                texts,
-                normalize_embeddings=True,
-                show_progress_bar=False,
-            )
-            return np.asarray(vectors, dtype=np.float32)
-
-        return await asyncio.to_thread(_encode)
+        return await self._backend.embed_texts(texts)
 
     async def embed_text(self, text: str) -> np.ndarray:
         """Embed a single text."""
-        matrix = await self.embed_texts([text])
-        return matrix[0]
+        return await self._backend.embed_text(text)

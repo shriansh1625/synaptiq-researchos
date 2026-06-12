@@ -10,13 +10,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1 import benchmark_router, observability_router, research_router
-from app.services.benchmark.evaluator import BenchmarkEvaluator
 from app.cache.redis_client import RedisClient
 from app.database.session import close_db
 from app.monitoring.health import check_database, check_redis, collect_dependency_status
 from app.monitoring.logger import configure_logging, get_logger
 from app.monitoring.tracing import init_tracing
-from config.settings import get_settings
+from config.settings import get_settings, validate_llm_config
 
 logger = get_logger(__name__)
 
@@ -44,26 +43,6 @@ async def lifespan(_application: FastAPI) -> AsyncIterator[None]:
             environment=settings.environment.value,
         )
 
-    try:
-        from app.services.embeddings.embedder import Embedder
-
-        embedder = Embedder()
-        await embedder.embed_text("warmup")
-        logger.info("Embedding model pre-warmed", dimension=embedder.dimension)
-    except Exception as exc:
-        logger.warning("Embedding pre-warm skipped", error=str(exc))
-
-    try:
-        metrics = BenchmarkEvaluator().evaluate()
-        logger.info(
-            "Benchmark evaluation complete",
-            accuracy_pct=metrics.accuracy_pct,
-            citation_precision_pct=metrics.citation_precision_pct,
-            hallucination_reduction_pct=metrics.hallucination_reduction_pct,
-        )
-    except Exception as exc:
-        logger.warning("Benchmark evaluation skipped at startup", error=str(exc))
-
     yield
 
     await close_db()
@@ -74,6 +53,7 @@ async def lifespan(_application: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     settings = get_settings()
+    validate_llm_config(settings)
     configure_logging(settings.log_level.value)
 
     application = FastAPI(

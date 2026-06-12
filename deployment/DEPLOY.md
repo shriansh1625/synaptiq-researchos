@@ -44,7 +44,7 @@ Never commit `docker/.env` or `backend/.env` (they are gitignored).
 5. Wait for deploy; note the API URL, e.g. `https://synaptiq-api.onrender.com`
 6. Verify: `https://synaptiq-api.onrender.com/health`
 
-**Free tier note:** Render spins down after inactivity; first request may take 30–60s.
+**Free tier note:** Render spins down after inactivity; first request may take 30–60s. Free instances have **512 MB RAM** — the Render build uses `requirements-render.txt` (no `torch`) and `EMBEDDING_PROVIDER=gemini` so embeddings run via the Gemini API instead of loading local models.
 
 **Region note:** `synaptiq-api` and `synaptiq-db` must be in the **same region** (both `oregon` in `render.yaml`). Render does **not** move an existing web service when you change region in the blueprint — check **synaptiq-api → Settings → Region**. If it still shows **Singapore**, delete `synaptiq-api` and sync the blueprint to recreate it in Oregon, or set `DATABASE_URL` to the database **External** connection string manually.
 
