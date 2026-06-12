@@ -7,10 +7,20 @@ import asyncio
 import google.generativeai as genai
 import numpy as np
 
+import os
+
 from config.settings import get_settings
 
-_GEMINI_EMBEDDING_MODEL = "models/text-embedding-004"
-_GEMINI_EMBEDDING_DIMENSION = 768
+_DEFAULT_GEMINI_EMBEDDING_MODEL = "models/gemini-embedding-001"
+_DEFAULT_GEMINI_EMBEDDING_DIMENSION = 768
+
+
+def _gemini_embedding_model() -> str:
+    return os.getenv("GEMINI_EMBEDDING_MODEL", _DEFAULT_GEMINI_EMBEDDING_MODEL).strip()
+
+
+def _gemini_embedding_dimension() -> int:
+    return int(os.getenv("GEMINI_EMBEDDING_DIMENSION", str(_DEFAULT_GEMINI_EMBEDDING_DIMENSION)))
 
 
 class GeminiEmbedder:
@@ -18,7 +28,7 @@ class GeminiEmbedder:
 
     @property
     def dimension(self) -> int:
-        return _GEMINI_EMBEDDING_DIMENSION
+        return _gemini_embedding_dimension()
 
     async def embed_texts(self, texts: list[str]) -> np.ndarray:
         """Embed a batch of texts without blocking the event loop."""
@@ -41,9 +51,10 @@ class GeminiEmbedder:
         vectors: list[np.ndarray] = []
         for text in texts:
             result = genai.embed_content(
-                model=_GEMINI_EMBEDDING_MODEL,
+                model=_gemini_embedding_model(),
                 content=text,
                 task_type="retrieval_document",
+                output_dimensionality=_gemini_embedding_dimension(),
             )
             embedding = np.asarray(result["embedding"], dtype=np.float32)
             norm = np.linalg.norm(embedding)

@@ -36,6 +36,10 @@ services:
         value: INFO
       - key: EMBEDDING_PROVIDER
         value: gemini
+      - key: GEMINI_EMBEDDING_MODEL
+        value: models/gemini-embedding-001
+      - key: GEMINI_EMBEDDING_DIMENSION
+        value: "768"
       - key: LLM_PROVIDER
         value: gemini
       - key: GEMINI_MODEL
