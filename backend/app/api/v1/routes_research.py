@@ -26,6 +26,7 @@ from app.schemas.api import (
 from app.graphs.research_graph import build_research_graph
 from app.services.pipeline.background_runner import spawn_analysis_background
 from app.services.pipeline.research_pipeline import ResearchPipelineService
+from app.services.reports.report_service import ReportService
 
 router = APIRouter(tags=["research"])
 
@@ -248,16 +249,21 @@ async def get_report(
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
 
-    pdf_path = Path((report.recommendations or {}).get("pdf_path", ""))
-    if not pdf_path.is_file():
-        fallback = get_reports_dir() / f"{report_id}.pdf"
-        pdf_path = fallback if fallback.is_file() else pdf_path
+    report_service = ReportService(db)
+    try:
+        pdf_path = await report_service.ensure_pdf(report)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate PDF report: {exc}",
+        ) from exc
 
     if pdf_path.is_file():
         return FileResponse(
             path=pdf_path,
             media_type="application/pdf",
             filename=f"synaptiq_report_{report_id}.pdf",
+            headers={"Content-Disposition": f'attachment; filename="synaptiq_report_{report_id}.pdf"'},
         )
 
     return ReportResponse(
